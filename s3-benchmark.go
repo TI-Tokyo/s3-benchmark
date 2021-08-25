@@ -198,8 +198,9 @@ func setSignature(req *http.Request) {
 	// Get the canonical resource and header
 	canonicalResource := req.URL.EscapedPath()
 	canonicalHeaders := canonicalAmzHeaders(req)
-	stringToSign := req.Method + "\n" + req.Header.Get("Content-MD5") + "\n" + req.Header.Get("Content-Type") + "\n\n" +
-		canonicalHeaders + canonicalResource
+	stringToSign := fmt.Sprintf("%s\n%s\n%s\n%s\n%s%s",
+		req.Method, req.Header.Get("Content-MD5"), req.Header.Get("Content-Type"),
+		dateHdr, canonicalHeaders, canonicalResource)
 	hash := hmacSHA1([]byte(secret_key), stringToSign)
 	signature := base64.StdEncoding.EncodeToString(hash)
 	req.Header.Set("Authorization", fmt.Sprintf("AWS %s:%s", access_key, signature))
